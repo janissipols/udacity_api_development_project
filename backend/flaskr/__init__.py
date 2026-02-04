@@ -10,49 +10,72 @@ def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
 
+    CORS(app) # Initialize CORS here
+
     if test_config is None:
         setup_db(app)
     else:
         database_path = test_config.get('SQLALCHEMY_DATABASE_URI')
         setup_db(app, database_path=database_path)
 
-    """
-    @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
-    """
-    with app.app_context():
-        db.create_all()
+    # Use the after_request decorator to set Access-Control-Allow headers
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response
 
-    """
-    @TODO: Use the after_request decorator to set Access-Control-Allow
-    """
+    @app.route('/categories')
+    def get_categories():
+        categories = Category.query.all()
+        formatted_categories = {category.id: category.type for category in categories}
 
-    """
-    @TODO:
-    Create an endpoint to handle GET requests
-    for all available categories.
-    """
+        return jsonify({
+            'success': True,
+            'categories': formatted_categories
+        })
 
+    @app.route('/questions')
+    def get_questions():
+        page = request.args.get('page', 1, type=int)
 
-    """
-    @TODO:
-    Create an endpoint to handle GET requests for questions,
-    including pagination (every 10 questions).
-    This endpoint should return a list of questions,
-    number of total questions, current category, categories.
+        pagination = Question.query.order_by(Question.id).paginate(page=page, per_page=QUESTIONS_PER_PAGE, error_out=False)
+        paginated_questions = [question.format() for question in pagination.items]
 
-    TEST: At this point, when you start the application
-    you should see questions and categories generated,
-    ten questions per page and pagination at the bottom of the screen for three pages.
-    Clicking on the page numbers should update the questions.
-    """
+        if not paginated_questions:
+            abort(404)
 
-    """
-    @TODO:
-    Create an endpoint to DELETE question using a question ID.
+        categories = Category.query.all()
+        formatted_categories = {category.id: category.type for category in categories}
 
-    TEST: When you click the trash icon next to a question, the question will be removed.
-    This removal will persist in the database and when you refresh the page.
-    """
+        return jsonify({
+            'success': True,
+            'questions': paginated_questions,
+            'total_questions': pagination.total,
+            'current_page': pagination.page,
+            'total_pages': pagination.pages,
+            'categories': formatted_categories,
+            'current_category': None
+        })
+        
+    @app.route('/questions/<int:question_id>', methods=['DELETE'])
+    def delete_question(question_id):
+        try:
+            question = Question.query.filter(Question.id == question_id).one_or_none()
+
+            if question is None:
+                abort(404)
+
+            question.delete()
+
+            return jsonify({
+                'success': True,
+                'deleted': question_id
+            })
+        except:
+            abort(422)
 
     """
     @TODO:
