@@ -14,5 +14,6 @@ Thumbs.db
 env/
 frontend/node_modules/
 
-.envbackend/.env
+
+backend/.env
 backend/.env.test
