@@ -13,7 +13,3 @@ ehthumbs.db
 Thumbs.db
 env/
 frontend/node_modules/
-
-
-backend/.env
-backend/.env.test
