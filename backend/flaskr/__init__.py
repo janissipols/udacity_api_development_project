@@ -29,6 +29,9 @@ def create_app(test_config=None):
 
     @app.route('/categories')
     def get_categories():
+        """
+        Handles GET requests for all available categories.
+        """
         categories = Category.query.all()
         formatted_categories = {category.id: category.type for category in categories}
 
@@ -37,8 +40,11 @@ def create_app(test_config=None):
             'categories': formatted_categories
         })
 
-    @app.route('/questions')
+    @app.route('/questions') 
     def get_questions():
+        """
+        Handles GET requests for questions, including pagination.
+        """
         page = request.args.get('page', 1, type=int)
 
         pagination = Question.query.order_by(Question.id).paginate(page=page, per_page=QUESTIONS_PER_PAGE, error_out=False)
@@ -62,6 +68,9 @@ def create_app(test_config=None):
         
     @app.route('/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
+        """
+        Handles DELETE requests for a single question.
+        """
         try:
             question = Question.query.filter(Question.id == question_id).one_or_none()
 
@@ -79,6 +88,9 @@ def create_app(test_config=None):
 
     @app.route('/questions', methods=['POST'])
     def create_question():
+        """
+        Handles POST requests for creating a new question.
+        """
         body = request.get_json()
 
         new_question = body.get('question', None)
@@ -103,6 +115,9 @@ def create_app(test_config=None):
 
     @app.route('/questions/search', methods=['POST'])
     def search_questions():
+        """
+        Handles POST requests for searching questions.
+        """
         body = request.get_json()
         search_term = body.get('searchTerm', None)
 
@@ -120,19 +135,11 @@ def create_app(test_config=None):
         else:
             abort(404)
 
-    """
-    @TODO:
-    Create a POST endpoint to get questions based on a search term.
-    It should return any questions for whom the search term
-    is a substring of the question.
-
-    TEST: Search by any phrase. The questions list will update to include
-    only question that include that string within their question.
-    Try using the word "title" to start.
-    """
-
     @app.route('/questions/category', methods=['POST'])
     def get_questions_by_category():
+        """
+        Handles POST requests for getting questions by category.
+        """
         body = request.get_json()
         category_id = body.get('category_id', None)
 
@@ -166,6 +173,9 @@ def create_app(test_config=None):
 
     @app.route('/quizzes', methods=['POST'])
     def play_quiz():
+        """
+        Handles POST requests for playing the quiz.
+        """
         body = request.get_json()
         previous_questions = body.get('previous_questions', [])
         quiz_category = body.get('quiz_category', None)
