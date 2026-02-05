@@ -164,17 +164,37 @@ def create_app(test_config=None):
         except:
             abort(422) # Unprocessable entity for other errors
 
-    """
-    @TODO:
-    Create a POST endpoint to get questions to play the quiz.
-    This endpoint should take category and previous question parameters
-    and return a random questions within the given category,
-    if provided, and that is not one of the previous questions.
+    @app.route('/quizzes', methods=['POST'])
+    def play_quiz():
+        body = request.get_json()
+        previous_questions = body.get('previous_questions', [])
+        quiz_category = body.get('quiz_category', None)
 
-    TEST: In the "Play" tab, after a user selects "All" or a category,
-    one question at a time is displayed, the user is allowed to answer
-    and shown whether they were correct or not.
-    """
+        try:
+            if quiz_category:
+                if quiz_category['id'] == 0: # 'ALL' category
+                    selection = Question.query.filter(Question.id.notin_(previous_questions))
+                else:
+                    selection = Question.query.filter(
+                        Question.category == quiz_category['id'],
+                        Question.id.notin_(previous_questions)
+                    )
+            else:
+                selection = Question.query.filter(Question.id.notin_(previous_questions))
+
+            questions = selection.all()
+
+            if questions:
+                question = random.choice(questions).format()
+            else:
+                question = None
+
+            return jsonify({
+                'success': True,
+                'question': question
+            })
+        except:
+            abort(422)
 
     """
     @TODO:
