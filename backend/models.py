@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, ForeignKey
 from flask_sqlalchemy import SQLAlchemy
 database_name = 'trivia'
 database_user = 'udemyuser'
@@ -26,7 +26,7 @@ class Question(db.Model):
     id = Column(Integer, primary_key=True)
     question = Column(String, nullable=False)
     answer = Column(String, nullable=False)
-    category = Column(String, nullable=False)
+    category = Column(Integer, db.ForeignKey('categories.id'), nullable=True)
     difficulty = Column(Integer, nullable=False)
 
     def __init__(self, question, answer, category, difficulty):
