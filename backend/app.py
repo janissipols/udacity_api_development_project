@@ -71,12 +71,12 @@ def create_app(test_config=None):
         """
         Handles DELETE requests for a single question.
         """
+        question = Question.query.filter(Question.id == question_id).one_or_none()
+
+        if question is None:
+            abort(404)
+
         try:
-            question = Question.query.filter(Question.id == question_id).one_or_none()
-
-            if question is None:
-                abort(404)
-
             question.delete()
 
             return jsonify({
@@ -177,8 +177,14 @@ def create_app(test_config=None):
         Handles POST requests for playing the quiz.
         """
         body = request.get_json()
+        if not body:
+            abort(400)
+
         previous_questions = body.get('previous_questions', [])
         quiz_category = body.get('quiz_category', None)
+
+        if quiz_category is None:
+            abort(400)
 
         try:
             if quiz_category:
@@ -221,6 +227,14 @@ def create_app(test_config=None):
             "error": 422,
             "message": "unprocessable"
         }), 422
+    
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            "success": False, 
+            "error": 400,
+            "message": "bad request"
+        }), 400
 
     return app
 
