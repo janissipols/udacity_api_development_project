@@ -67,26 +67,138 @@ One note before you delve into your tasks: for each endpoint, you are expected t
 8. Create a `POST` endpoint to get questions to play the quiz. This endpoint should take a category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions.
 9. Create error handlers for all expected errors including 400, 404, 422, and 500.
 
-## Documenting your Endpoints
+## API Documentation
 
-You will need to provide detailed documentation of your API endpoints including the URL, request parameters, and the response body. Use the example below as a reference.
+### GET /categories
 
-### Documentation Example
-
-`GET '/api/v1.0/categories'`
-
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+- Fetches a dictionary of categories.
 - Request Arguments: None
-- Returns: An object with a single key, `categories`, that contains an object of `id: category_string` key: value pairs.
+- Returns: An object with a `success` boolean and a `categories` object, where keys are category IDs and values are category types.
 
 ```json
 {
-  "1": "Science",
-  "2": "Art",
-  "3": "Geography",
-  "4": "History",
-  "5": "Entertainment",
-  "6": "Sports"
+  "success": true,
+  "categories": {
+    "1": "Science",
+    "2": "Art"
+  }
+}
+```
+
+### GET /questions
+
+- Fetches a paginated set of questions.
+- Request Arguments: `page` (integer, optional) - specifies the page number to retrieve.
+- Returns: An object with `success`, a list of `questions`, `total_questions`, a dictionary of `categories`, and `current_category`.
+
+```json
+{
+  "success": true,
+  "questions": [
+    {
+      "id": 1,
+      "question": "What is the capital of France?",
+      "answer": "Paris",
+      "category": 1,
+      "difficulty": 2
+    }
+  ],
+  "total_questions": 1,
+  "categories": { "1": "Science" },
+  "current_category": null,
+  "current_page": 1,
+  "total_pages": 1
+}
+```
+
+### DELETE /questions/<id>
+
+- Deletes the question with the specified ID.
+- Request Arguments: `question_id` (integer) in the URL.
+- Returns: An object with `success` and the `deleted` question ID.
+
+```json
+{
+  "success": true,
+  "deleted": 1
+}
+```
+
+### POST /questions
+
+- Creates a new question.
+- Request Body: A JSON object with `question`, `answer`, `category` (ID), and `difficulty`.
+- Returns: An object with `success` and the `created` question ID.
+
+```json
+{
+  "success": true,
+  "created": 2
+}
+```
+
+### POST /questions/search
+
+- Searches for questions based on a search term.
+- Request Body: A JSON object with a `searchTerm`.
+- Returns: An object with `success`, a list of matching `questions`, `total_questions`, and `current_category`.
+
+```json
+{
+  "success": true,
+  "questions": [
+    {
+      "id": 1,
+      "question": "What is the capital of France?",
+      "answer": "Paris",
+      "category": 1,
+      "difficulty": 2
+    }
+  ],
+  "total_questions": 1,
+  "current_category": null
+}
+```
+
+### POST /questions/category
+
+- Fetches questions for a specific category.
+- Request Body: A JSON object with a `category_id`.
+- Returns: An object with `success`, a list of `questions`, `total_questions`, and `current_category`.
+
+```json
+{
+  "success": true,
+  "questions": [
+    {
+      "id": 1,
+      "question": "What is the capital of France?",
+      "answer": "Paris",
+      "category": 1,
+      "difficulty": 2
+    }
+  ],
+  "total_questions": 1,
+  "current_category": "Science"
+}
+```
+
+### POST /quizzes
+
+- Fetches a question for a quiz.
+- Request Body: A JSON object with `previous_questions` (a list of question IDs) and `quiz_category` (an object with an `id`).
+- Returns: An object with `success` and the next `question`.
+
+```json
+{
+  "success": true,
+  "question": {
+    "id": 2,
+    "question": "What is 2 + 2?",
+    "answer": "4",
+    "category": 1,
+    "difficulty": 1
+  }
 }
 ```
 
