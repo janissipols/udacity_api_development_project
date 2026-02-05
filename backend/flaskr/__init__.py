@@ -124,14 +124,38 @@ def create_app(test_config=None):
     Try using the word "title" to start.
     """
 
-    """
-    @TODO:
-    Create a GET endpoint to get questions based on category.
+    @app.route('/questions/category', methods=['POST'])
+    def get_questions_by_category():
+        body = request.get_json()
+        category_id = body.get('category_id', None)
 
-    TEST: In the "List" tab / main screen, clicking on one of the
-    categories in the left column will cause only questions of that
-    category to be shown.
-    """
+        if not category_id:
+            abort(400) # Bad request if no category_id is provided
+
+        try:
+            # Check if category exists
+            category = Category.query.filter_by(id=category_id).one_or_none()
+            if category is None:
+                abort(404) # Category not found
+
+            selection = Question.query.filter_by(category=category_id).order_by(Question.id)
+            total_questions = selection.count()
+
+            page = request.args.get('page', 1, type=int)
+            pagination = selection.paginate(page=page, per_page=QUESTIONS_PER_PAGE, error_out=False)
+            paginated_questions = [question.format() for question in pagination.items]
+
+            if not paginated_questions:
+                abort(404)
+
+            return jsonify({
+                'success': True,
+                'questions': paginated_questions,
+                'total_questions': total_questions,
+                'current_category': category.type
+            })
+        except:
+            abort(422) # Unprocessable entity for other errors
 
     """
     @TODO:
