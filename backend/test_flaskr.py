@@ -2,7 +2,7 @@ import os
 import unittest
 import json
 from sqlalchemy import text
-
+from dotenv import load_dotenv
 from app import create_app
 from models import db, Question, Category
 
@@ -12,10 +12,13 @@ class TriviaTestCase(unittest.TestCase):
 
     def setUp(self):
         """Define test variables and initialize app."""
-        self.database_name = "trivia_test"
-        self.database_user = "udemyuser"
-        self.database_password = "udemy"
-        self.database_host = "localhost:5432"
+        
+        load_dotenv(dotenv_path='./backend/.env.test')
+
+        self.database_name = os.getenv('DB_NAME')
+        self.database_user = os.getenv('DB_USER')
+        self.database_password = os.getenv('DB_PASSWORD')
+        self.database_host = os.getenv('DB_HOST')
         self.database_path = f"postgresql://{self.database_user}:{self.database_password}@{self.database_host}/{self.database_name}"
 
         # Create app with the test configuration
